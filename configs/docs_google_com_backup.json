@@ -1,0 +1,16 @@
+{
+  "service_name": "docs_google_com",
+  "version": "1.0.0",
+  "created_at": "2026-02-25T17:39:42.270710",
+  "url_patterns": [
+    "docs.google.com"
+  ],
+  "field_mappings": {
+    "applicant_name": "entry.1700754481",
+    "mobile": "entry.1441615842",
+    "marital_status": "partialResponse",
+    "taluk": "tag"
+  },
+  "upload_fields": [],
+  "conditional_logic": {}
+}

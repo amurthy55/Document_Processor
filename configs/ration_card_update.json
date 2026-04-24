@@ -1,0 +1,62 @@
+{
+  "service_name": "Ration Card Update",
+  "service_id": "ration_card_update",
+  "version": "1.0.0",
+  "description": "Ration Card Registration and Update",
+  "url_patterns": [
+    "*.tn.gov.in.*ration",
+    "pds.gov.in"
+  ],
+  "field_mappings": {
+    "applicant_name": {
+      "form_field_id": "applicant_name",
+      "input_type": "text",
+      "label_hint": "Head of Family Name",
+      "required": true
+    },
+    "father_name": {
+      "form_field_id": "father_name",
+      "input_type": "text",
+      "label_hint": "Father's Name",
+      "required": true
+    },
+    "address_line1": {
+      "form_field_id": "address",
+      "input_type": "textarea",
+      "label_hint": "Address",
+      "required": true
+    },
+    "district": {
+      "form_field_id": "district",
+      "input_type": "select",
+      "label_hint": "District",
+      "required": true
+    },
+    "taluk": {
+      "form_field_id": "taluk",
+      "input_type": "select",
+      "label_hint": "Taluk",
+      "required": true
+    },
+    "pincode": {
+      "form_field_id": "pincode",
+      "input_type": "text",
+      "label_hint": "Pin Code",
+      "required": true
+    },
+    "mobile": {
+      "form_field_id": "mobile_no",
+      "input_type": "tel",
+      "label_hint": "Mobile Number",
+      "required": true
+    },
+    "aadhaar": {
+      "form_field_id": "aadhaar",
+      "input_type": "text",
+      "label_hint": "Aadhaar Number",
+      "required": true
+    }
+  },
+  "upload_fields": ["address_proof", "identity_proof", "income_proof"],
+  "conditional_logic": {}
+}

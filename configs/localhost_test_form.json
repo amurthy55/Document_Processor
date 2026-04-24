@@ -1,0 +1,31 @@
+{
+  "service_name": "eSeva Test Form",
+  "service_id": "localhost_test_form",
+  "version": "1.0.0",
+  "description": "Local test form for verifying extension field-fill",
+  "url_patterns": [
+    "localhost",
+    "127.0.0.1"
+  ],
+  "field_mappings": {
+    "applicant_name": "applicant_name",
+    "father_name": "father_name",
+    "mother_name": "mother_name",
+    "dob": "date_of_birth",
+    "gender": "gender",
+    "mobile": "mobile_no",
+    "email": "email",
+    "aadhaar": "aadhaar_number",
+    "address": "address",
+    "pincode": "pincode",
+    "registration_no": "registration_no",
+    "place_of_birth": "place_of_birth"
+  },
+  "upload_fields": [],
+  "file_mappings": {
+    "doc_upload_1": "Aadhaar Card",
+    "doc_upload_2": "Supporting Document",
+    "applicant_photo": "Passport Photo"
+  },
+  "conditional_logic": {}
+}

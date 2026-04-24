@@ -1,0 +1,12 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+cryptography==44.0.2
+pydantic==2.10.6
+pydantic-settings==2.7.1
+python-multipart==0.0.12
+Pillow==10.1.0
+pytesseract==0.3.10
+PyMuPDF==1.27.1
+opencv-python-headless==4.9.0.80
+numpy<2
+platformdirs==4.2.0

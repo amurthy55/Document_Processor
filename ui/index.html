@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Document Processor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1380px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 1.55em; font-weight: 700; }
+        .header p  { font-size: 0.85em; opacity: 0.8; margin-top: 3px; }
+        .header-badge {
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 0.82em;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        /* ─── TWO-COLUMN LAYOUT ─── */
+        .main-content {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            min-height: calc(100vh - 110px);
+        }
+
+        /* ─── LEFT PANEL ─── */
+        .upload-panel {
+            border-right: 1px solid #e5e7eb;
+            padding: 28px 24px;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .panel-label {
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: #9ca3af;
+        }
+
+        /* Drop zone */
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 26px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        .upload-zone .dz-icon { font-size: 2.2em; margin-bottom: 8px; }
+        .upload-zone h3 { font-size: 0.95em; color: #374151; margin-bottom: 4px; }
+        .upload-zone p  { font-size: 0.78em; color: #9ca3af; }
+        .file-input { display: none; }
+        .choose-btn {
+            display: inline-block;
+            margin-top: 10px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .choose-btn:hover { background: #4338ca; }
+
+        /* Service dropdown */
+        .field-group label {
+            display: block;
+            font-size: 0.82em;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .field-group select {
+            width: 100%;
+            padding: 9px 32px 9px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 0.88em;
+            color: #374151;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 15px;
+        }
+        .field-group select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 2px #e0e7ff; }
+
+        /* Files list */
+        .files-list { display: flex; flex-direction: column; gap: 7px; }
+        .file-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 7px;
+            padding: 9px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-meta .file-name { font-size: 0.85em; font-weight: 500; color: #374151; }
+        .file-meta .file-size { font-size: 0.75em; color: #9ca3af; margin-top: 1px; }
+        .remove-file { background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 1.2em; line-height: 1; padding: 0 3px; transition: color 0.15s; }
+        .remove-file:hover { color: #ef4444; }
+
+        /* Progress */
+        .progress-wrap { display: none; }
+        .progress-track {
+            width: 100%; height: 7px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 7px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            width: 0%;
+            transition: width 0.35s ease;
+        }
+        .progress-pct { font-size: 0.78em; color: #6b7280; text-align: center; margin-bottom: 8px; }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .pill-processing { background: #fef3c7; color: #92400e; }
+        .pill-completed  { background: #d1fae5; color: #065f46; }
+        .pill-error      { background: #fee2e2; color: #991b1b; }
+
+        .spinner {
+            width: 13px; height: 13px;
+            border: 2px solid rgba(146,64,14,0.3);
+            border-top-color: #92400e;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Process button */
+        .process-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: auto;
+            letter-spacing: 0.02em;
+        }
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(79,70,229,0.38);
+        }
+        .process-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ─── RIGHT PANEL ─── */
+        .ops-panel {
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: white;
+        }
+
+        .ops-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ops-header h2 { font-size: 1.05em; font-weight: 700; color: #111827; }
+        .ops-meta { font-size: 0.8em; color: #9ca3af; font-weight: 400; margin-left: 8px; }
+
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
+        .icon-btn {
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.8em;
+            cursor: pointer;
+            color: #6b7280;
+            transition: all 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .icon-btn:hover { border-color: #4f46e5; color: #4f46e5; background: #eef2ff; }
+
+        /* Table */
+        .table-wrap {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+        thead th {
+            padding: 11px 14px;
+            text-align: left;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.12s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fafafa; }
+        tbody td { padding: 12px 14px; vertical-align: middle; }
+
+        .td-num { color: #d1d5db; font-size: 0.78em; font-weight: 600; width: 32px; }
+
+        .td-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 0.9em;
+            min-width: 130px;
+        }
+        .name-missing { color: #d1d5db; font-weight: 400; font-style: italic; font-size: 0.85em; }
+
+        .td-opid {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75em;
+            color: #9ca3af;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+        .opid-short { display: none; }
+
+        .td-service select {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 5px 26px 5px 8px;
+            font-size: 0.82em;
+            color: #374151;
+            background: white;
+            cursor: pointer;
+            min-width: 170px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            background-size: 13px;
+            transition: border-color 0.15s;
+        }
+        .td-service select:focus { outline: none; border-color: #4f46e5; }
+
+        .copy-btn {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 0.78em;
+            cursor: pointer;
+            color: #374151;
+            transition: all 0.18s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .copy-btn:hover { background: #e0e7ff; border-color: #a5b4fc; color: #4338ca; }
+        .copy-btn.copied { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+        
+        .delete-btn { 
+            background: #fef2f2; 
+            border-color: #fecaca; 
+            color: #dc2626; 
+        }
+        .delete-btn:hover { 
+            background: #fee2e2; 
+            border-color: #fca5a5; 
+            color: #b91c1c; 
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.72em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .badge-completed  { background: #dbeafe; color: #1e40af; }
+        .badge-processing { background: #fef3c7; color: #92400e; }
+        .badge-failed     { background: #fee2e2; color: #991b1b; }
+        .badge-active     { background: #d1fae5; color: #065f46; }
+        .badge-unknown    { background: #f3f4f6; color: #6b7280; }
+
+        .td-time { color: #9ca3af; font-size: 0.78em; white-space: nowrap; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 56px 20px;
+            color: #d1d5db;
+        }
+        .empty-state .es-icon { font-size: 2.8em; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.88em; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1f2937;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.25s ease;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        .fade-in { animation: fadeIn 0.35s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>📄 Document Processor</h1>
+            <p>Upload documents · Extract data · Track operations</p>
+        </div>
+        <div class="header-badge">Operator Console</div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- ── LEFT: Upload Panel ── -->
+        <div class="upload-panel">
+
+            <div class="panel-label">Upload Documents</div>
+
+            <div class="upload-zone" id="uploadZone">
+                <div class="dz-icon">📁</div>
+                <h3>Drop files here</h3>
+                <p>PDF documents or JPG/PNG photos</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+                <button class="choose-btn" onclick="document.getElementById('fileInput').click()">Choose Files</button>
+            </div>
+
+            <!-- Service dropdown -->
+            <div class="field-group">
+                <label for="serviceSelect">Service Type</label>
+                <select id="serviceSelect">
+                    <option value="">— Select Service —</option>
+                    <option value="COMMUNITY_CERTIFICATE">Community Certificate</option>
+                    <option value="INCOME_CERTIFICATE">Income Certificate</option>
+                    <option value="NATIVITY_CERTIFICATE">Nativity Certificate</option>
+                    <option value="BIRTH_CERTIFICATE">Birth Certificate</option>
+                    <option value="DEATH_CERTIFICATE">Death Certificate</option>
+                    <option value="RESIDENCE_CERTIFICATE">Residence Certificate</option>
+                    <option value="MARRIAGE_CERTIFICATE">Marriage Certificate</option>
+                    <option value="OBC_CERTIFICATE">OBC Certificate</option>
+                    <option value="SC_ST_CERTIFICATE">SC/ST Certificate</option>
+                    <option value="AADHAAR_ENROLMENT">Aadhaar Enrolment</option>
+                    <option value="PAN_APPLICATION">PAN Application</option>
+                    <option value="PASSPORT_APPLICATION">Passport Application</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+
+            <!-- Document type toggle (hidden for image-only uploads) -->
+            <div class="field-group" id="docTypeWrap">
+                <label for="docTypeSelect">Document Type</label>
+                <select id="docTypeSelect">
+                    <option value="auto">Auto-detect</option>
+                    <option value="digital">Original / Digital PDF</option>
+                    <option value="scanned">Scanned Document (use OCR)</option>
+                </select>
+            </div>
+
+            <!-- Selected files list -->
+            <div class="files-list" id="filesList"></div>
+
+            <!-- Progress (shown during processing) -->
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-pct" id="progressPct">0%</div>
+                <div class="status-pill pill-processing" id="statusPill">
+                    <span class="spinner" id="pillSpinner"></span>
+                    <span id="statusMsg">Processing…</span>
+                </div>
+            </div>
+
+            <button class="process-btn" id="processBtn" onclick="processDocuments()" disabled>
+                🚀 Process Documents
+            </button>
+
+        </div>
+
+        <!-- ── RIGHT: Operations Table ── -->
+        <div class="ops-panel">
+
+            <div class="ops-header">
+                <h2>
+                    Recent Operations
+                    <span class="ops-meta" id="opCountLabel"></span>
+                </h2>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="openOperationsFolder()">📁 Operations</button>
+                    <button class="icon-btn" onclick="openExtensionFolder()">🧩 Extension</button>
+                    <button class="icon-btn delete-btn" onclick="deleteAllOperations()">🗑️ Delete All</button>
+                    <button class="icon-btn" onclick="loadOperations()">⟳ Refresh</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Operation ID</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Delete</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="opsTableBody">
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <div class="es-icon">📋</div>
+                                    <p>No operations yet. Upload documents to get started.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:8765/api';
+
+    // ── How many operations to keep (delete the rest) ──
+    const OPS_TO_MAINTAIN = 10;
+
+    let selectedFiles = [];
+    let currentOperationId = null;
+    // In-memory map: operationId -> service label chosen by operator
+    let serviceLabels = {};
+
+    // ── Persisted service labels (survive page refresh) ──
+    function saveServiceLabels() {
+        try { localStorage.setItem('eseva_service_labels', JSON.stringify(serviceLabels)); } catch(_) {}
+    }
+    function loadServiceLabels() {
+        try {
+            const raw = localStorage.getItem('eseva_service_labels');
+            if (raw) serviceLabels = JSON.parse(raw);
+        } catch(_) {}
+    }
+
+    // ────────────────────────────────────────────────
+    // FILE UPLOAD HANDLING
+    // ────────────────────────────────────────────────
+    const uploadZone  = document.getElementById('uploadZone');
+    const fileInput   = document.getElementById('fileInput');
+    const filesList   = document.getElementById('filesList');
+    const processBtn  = document.getElementById('processBtn');
+
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    uploadZone.addEventListener('click', e => {
+        if (e.target === uploadZone || e.target.tagName === 'H3' || e.target.tagName === 'P' || e.target.classList.contains('dz-icon')) {
+            fileInput.click();
+        }
+    });
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    function isAcceptedFile(f) {
+        const name = f.name.toLowerCase();
+        return name.endsWith('.pdf') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png');
+    }
+
+    function hasOnlyImages() {
+        return selectedFiles.length > 0 && selectedFiles.every(f => !f.name.toLowerCase().endsWith('.pdf'));
+    }
+
+    function handleFiles(files) {
+        const valid = Array.from(files).filter(isAcceptedFile);
+        if (!valid.length) { showToast('Only PDF, JPG or PNG files are accepted.'); return; }
+        selectedFiles = [...selectedFiles, ...valid];
+        renderFilesList();
+        processBtn.disabled = selectedFiles.length === 0;
+        // Hide doc type selector for image-only uploads (photos need no OCR selection)
+        document.getElementById('docTypeWrap').style.display = hasOnlyImages() ? 'none' : '';
+    }
+
+    function renderFilesList() {
+        filesList.innerHTML = '';
+        selectedFiles.forEach((f, i) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <div class="file-meta">
+                    <div class="file-name">${escHtml(f.name)}</div>
+                    <div class="file-size">${fmtSize(f.size)}</div>
+                </div>
+                <button class="remove-file" title="Remove" onclick="removeFile(${i})">✕</button>`;
+            filesList.appendChild(div);
+        });
+    }
+
+    function removeFile(i) {
+        selectedFiles.splice(i, 1);
+        renderFilesList();
+        processBtn.disabled = selectedFiles.length === 0;
+    }
+
+    // ────────────────────────────────────────────────
+    // PROCESSING
+    // ────────────────────────────────────────────────
+    async function processDocuments() {
+        if (!selectedFiles.length) return;
+
+        const service = document.getElementById('serviceSelect').value;
+        if (!service) { showToast('Please select a Service Type before processing.'); return; }
+
+        const formData = new FormData();
+        selectedFiles.forEach(f => formData.append('files', f));
+        formData.append('doc_type', document.getElementById('docTypeSelect').value);
+
+        // Lock UI
+        processBtn.disabled = true;
+        document.getElementById('progressWrap').style.display = 'block';
+        setStatusPill('processing', 'Uploading…');
+
+        try {
+            const res = await fetch(`${API_BASE}/documents/process`, { method: 'POST', body: formData });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            currentOperationId = data.operation_id;
+
+            // Store the service choice immediately
+            serviceLabels[currentOperationId] = service;
+            saveServiceLabels();
+
+            setStatusPill('processing', 'Processing documents…');
+            pollStatus();
+
+        } catch (err) {
+            console.error(err);
+            setStatusPill('error', 'Upload failed — is the backend running?');
+            processBtn.disabled = false;
+        }
+    }
+
+    async function pollStatus() {
+        if (!currentOperationId) return;
+        try {
+            const res = await fetch(`${API_BASE}/documents/status/${currentOperationId}`);
+            const s = await res.json();
+
+            const pct = Math.round((s.progress || 0) * 100);
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressPct').textContent = pct + '%';
+
+            if (s.status === 'active') {
+                setStatusPill('completed', '✓ Ready — click End Operation when done');
+                document.getElementById('pillSpinner').style.display = 'none';
+                // Reset upload panel after a brief pause, then refresh table
+                setTimeout(async () => {
+                    await finishAndCleanup();
+                }, 1200);
+            } else if (s.status === 'failed') {
+                setStatusPill('error', s.message || 'Processing failed');
+                document.getElementById('pillSpinner').style.display = 'none';
+                processBtn.disabled = false;
+            } else {
+                if (s.message) document.getElementById('statusMsg').textContent = s.message;
+                setTimeout(pollStatus, 1000);
+            }
+        } catch (err) {
+            setTimeout(pollStatus, 2000);
+        }
+    }
+
+    async function finishAndCleanup() {
+        // 1. Reload the operations table (fetches from backend including new op)
+        await loadOperations();
+
+        // 2. Enforce OPS_TO_MAINTAIN limit — delete oldest beyond the cap
+        await pruneOldOperations();
+
+        // 3. Reset left panel
+        resetUploadPanel();
+    }
+
+    // ────────────────────────────────────────────────
+    // OPERATIONS TABLE
+    // ────────────────────────────────────────────────
+    async function loadOperations() {
+        try {
+            const res = await fetch(`${API_BASE}/documents/operations`);
+            const data = await res.json();
+            renderOpsTable(data.operations || []);
+        } catch (err) {
+            console.error('Failed to load operations:', err);
+        }
+    }
+
+    function renderOpsTable(ops) {
+        const tbody = document.getElementById('opsTableBody');
+        const label = document.getElementById('opCountLabel');
+
+        // Limit display to OPS_TO_MAINTAIN most recent (already sorted newest-first by backend)
+        const visible = ops.slice(0, OPS_TO_MAINTAIN);
+
+        label.textContent = visible.length
+            ? `(showing ${visible.length} of ${ops.length})`
+            : '';
+
+        if (!visible.length) {
+            tbody.innerHTML = `<tr><td colspan="8">
+                <div class="empty-state">
+                    <div class="es-icon">📋</div>
+                    <p>No operations yet. Upload documents to get started.</p>
+                </div></td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        visible.forEach((op, idx) => {
+            const tr = document.createElement('tr');
+            tr.className = 'fade-in';
+
+            const name = op.name
+                ? escHtml(op.name)
+                : `<span class="name-missing">Not extracted</span>`;
+
+            const opIdShort = op.operation_id.slice(0, 8) + '…';
+            const savedService = serviceLabels[op.operation_id] || '';
+            const timeStr = op.created_at ? fmtTime(op.created_at) : '—';
+
+            const reprocessBtn = (op.status === 'unknown' || op.status === 'failed')
+                ? `<button class="copy-btn" style="background:#fef9c3;border-color:#fde047;color:#854d0e;margin-top:4px"
+                       onclick="reprocessOperation('${op.operation_id}')">↺ Reprocess</button>`
+                : '';
+            tr.innerHTML = `
+                <td class="td-num">${idx + 1}</td>
+                <td class="td-name">${name}</td>
+                <td class="td-opid" title="${escHtml(op.operation_id)}">${opIdShort}</td>
+                <td class="td-service">${buildServiceSelect(op.operation_id, savedService)}</td>
+                <td>${buildStatusBadge(op.status)}${reprocessBtn}</td>
+                <td class="td-time">${timeStr}</td>
+                <td>
+                    <button class="copy-btn delete-btn" onclick="deleteOperation('${op.operation_id}')"
+                        title="Delete this operation and all its files">
+                        🗑️
+                    </button>
+                </td>
+                <td>
+                    <button class="copy-btn" id="copy-${op.operation_id}"
+                        onclick="copyOpId('${op.operation_id}')">
+                        📋 Copy ID
+                    </button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function buildServiceSelect(opId, current) {
+        const services = [
+            ['', '— Select —'],
+            ['COMMUNITY_CERTIFICATE',  'Community Certificate'],
+            ['INCOME_CERTIFICATE',     'Income Certificate'],
+            ['NATIVITY_CERTIFICATE',   'Nativity Certificate'],
+            ['BIRTH_CERTIFICATE',      'Birth Certificate'],
+            ['DEATH_CERTIFICATE',      'Death Certificate'],
+            ['RESIDENCE_CERTIFICATE',  'Residence Certificate'],
+            ['MARRIAGE_CERTIFICATE',   'Marriage Certificate'],
+            ['OBC_CERTIFICATE',        'OBC Certificate'],
+            ['SC_ST_CERTIFICATE',      'SC/ST Certificate'],
+            ['AADHAAR_ENROLMENT',      'Aadhaar Enrolment'],
+            ['PAN_APPLICATION',        'PAN Application'],
+            ['PASSPORT_APPLICATION',   'Passport Application'],
+            ['OTHER',                  'Other'],
+        ];
+        const opts = services.map(([v, l]) =>
+            `<option value="${v}" ${v === current ? 'selected' : ''}>${escHtml(l)}</option>`
+        ).join('');
+        return `<select onchange="onServiceChange('${opId}', this.value)">${opts}</select>`;
+    }
+
+    function onServiceChange(opId, value) {
+        serviceLabels[opId] = value;
+        saveServiceLabels();
+    }
+
+    function buildStatusBadge(status) {
+        const map = {
+            active:     ['badge-active',     'Active'],
+            completed:  ['badge-completed',  'Completed'],
+            processing: ['badge-processing', 'Processing'],
+            failed:     ['badge-failed',     'Failed'],
+            unknown:    ['badge-unknown',    'Unknown'],
+        };
+        const [cls, label] = map[status] || ['badge-unknown', status || 'Unknown'];
+        return `<span class="status-badge ${cls}">${label}</span>`;
+    }
+
+    async function copyOpId(opId) {
+        try {
+            await navigator.clipboard.writeText(opId);
+        } catch (_) {
+            // Fallback for non-https
+            const ta = document.createElement('textarea');
+            ta.value = opId;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        const btn = document.getElementById(`copy-${opId}`);
+        if (btn) {
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '📋 Copy ID';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+        showToast('Operation ID copied to clipboard');
+    }
+
+    async function reprocessOperation(opId) {
+        try {
+            showToast('Reprocessing…');
+            const fd = new FormData();
+            fd.append('doc_type', 'auto');
+            const res = await fetch(`${API_BASE}/documents/reprocess/${opId}`, { method: 'POST', body: fd });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            showToast('Reprocessing started — refresh in a moment');
+            setTimeout(loadOperations, 4000);
+        } catch (err) {
+            showToast('Reprocess failed: ' + err.message);
+        }
+    }
+
+    // ────────────────────────────────────────────────
+    // PRUNING — keep only OPS_TO_MAINTAIN most recent
+    // ────────────────────────────────────────────────
+    async function pruneOldOperations() {
+        try {
+            const res = await fetch(`${API_BASE}/documents/operations`);
+            const data = await res.json();
+            const ops = data.operations || [];
+
+            // ops is already sorted newest-first by backend
+            if (ops.length <= OPS_TO_MAINTAIN) return;
+
+            const toDelete = ops.slice(OPS_TO_MAINTAIN).map(o => o.operation_id);
+            if (!toDelete.length) return;
+
+            // Also purge from local serviceLabels
+            toDelete.forEach(id => delete serviceLabels[id]);
+            saveServiceLabels();
+
+            // Bulk delete via backend
+            await fetch(`${API_BASE}/documents/operations`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(toDelete),
+            });
+
+            // Re-render without the deleted rows
+            await loadOperations();
+        } catch (err) {
+            console.error('Prune failed:', err);
+        }
+    }
+
+    // ────────────────────────────────────────────────
+    // HELPERS
+    // ────────────────────────────────────────────────
+    function resetUploadPanel() {
+        selectedFiles = [];
+        currentOperationId = null;
+        fileInput.value = '';
+        renderFilesList();
+        processBtn.disabled = true;
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('progressFill').style.width = '0%';
+        document.getElementById('progressPct').textContent = '0%';
+        document.getElementById('pillSpinner').style.display = '';
+        setStatusPill('processing', 'Processing…');
+        document.getElementById('serviceSelect').value = '';
+        document.getElementById('docTypeSelect').value = 'auto';
+        document.getElementById('docTypeWrap').style.display = '';
+    }
+
+    function setStatusPill(type, msg) {
+        const pill = document.getElementById('statusPill');
+        pill.className = 'status-pill';
+        if (type === 'processing') pill.classList.add('pill-processing');
+        else if (type === 'completed') pill.classList.add('pill-completed');
+        else pill.classList.add('pill-error');
+        document.getElementById('statusMsg').textContent = msg;
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function fmtSize(bytes) {
+        if (!bytes) return '0 B';
+        const units = ['B','KB','MB','GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+    }
+
+    function fmtTime(msEpoch) {
+        const d = new Date(msEpoch);
+        const now = new Date();
+        const diffMin = Math.round((now - d) / 60000);
+        if (diffMin < 1)  return 'just now';
+        if (diffMin < 60) return `${diffMin}m ago`;
+        const diffHr = Math.round(diffMin / 60);
+        if (diffHr < 24)  return `${diffHr}h ago`;
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
+    }
+
+    // ────────────────────────────────────────────────
+    // BACKEND HEALTH CHECK
+    // ────────────────────────────────────────────────
+    async function checkBackend() {
+        try {
+            const res = await fetch(`${API_BASE}/documents/operations`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderOpsTable(data.operations || []);
+        } catch (_) {
+            document.body.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100vh;
+                            background:linear-gradient(135deg,#667eea,#764ba2);">
+                    <div style="background:white;padding:40px;border-radius:14px;text-align:center;
+                                box-shadow:0 20px 40px rgba(0,0,0,0.12);max-width:480px;">
+                        <div style="font-size:2.5em;margin-bottom:16px;">⚠️</div>
+                        <h2 style="color:#dc2626;margin-bottom:12px;">Backend Not Running</h2>
+                        <p style="color:#6b7280;margin-bottom:20px;font-size:0.9em;">
+                            Start the backend server first:
+                        </p>
+                        <code style="display:block;background:#f3f4f6;padding:12px;border-radius:7px;
+                                     font-size:0.8em;color:#374151;margin-bottom:20px;text-align:left;
+                                     word-break:break-all;">
+                            cd backend &amp;&amp; source ../.venv/bin/activate &amp;&amp;
+                            python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8765
+                        </code>
+                        <button onclick="location.reload()"
+                            style="background:#4f46e5;color:white;border:none;padding:10px 24px;
+                                   border-radius:7px;cursor:pointer;font-size:0.9em;font-weight:600;">
+                            🔄 Retry
+                        </button>
+                    </div>
+                </div>`;
+        }
+    }
+
+    // ────────────────────────────────────────────────
+    // AUTO-REFRESH — polls every 15s so End Operation
+    // from the extension is reflected without manual refresh
+    // ────────────────────────────────────────────────
+    let _autoRefreshTimer = null;
+    function startAutoRefresh() {
+        if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+        _autoRefreshTimer = setInterval(loadOperations, 15000);
+    }
+
+    // ────────────────────────────────────────────────
+    // INIT
+    // ────────────────────────────────────────────────
+    loadServiceLabels();
+    checkBackend();
+    startAutoRefresh();
+
+    // Folder open handlers
+    function openOperationsFolder() {
+        window.electronAPI.openOperationsDir();
+    }
+
+    function openExtensionFolder() {
+        window.electronAPI.openExtensionDir();
+    }
+
+    // Delete operation handlers
+    async function deleteOperation(operationId) {
+        if (!confirm(`Are you sure you want to delete this operation and all its files?\n\nOperation ID: ${operationId.slice(0, 8)}...`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/documents/operations/${operationId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            showToast('Operation deleted successfully');
+            await loadOperations();
+        } catch (err) {
+            showToast('Failed to delete operation: ' + err.message);
+        }
+    }
+
+    async function deleteAllOperations() {
+        const count = document.querySelectorAll('#opsTableBody tr:not(:has(.empty-state))').length;
+        if (count === 0) {
+            showToast('No operations to delete');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to delete ALL ${count} operations and all their files?\n\nThis action cannot be undone!`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/documents/operations`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const result = await res.json();
+            showToast(result.message || 'All operations deleted successfully');
+            await loadOperations();
+        } catch (err) {
+            showToast('Failed to delete operations: ' + err.message);
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "service_name": "docs_google_com",
+  "version": "1.0.0",
+  "created_at": "2026-02-26T12:53:13.088137",
+  "url_patterns": [
+    "docs.google.com"
+  ],
+  "field_mappings": {
+    "applicant_name": "entry.1700754481",
+    "mobile": "entry.1441615842"
+  },
+  "upload_fields": [],
+  "conditional_logic": {}
+}

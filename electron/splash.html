@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocMagic 🪄</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a2744;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4);
+    }
+
+    .logo-text h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text p {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .spinner-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: #f97316;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status {
+      font-size: 14px;
+      color: #94a3b8;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.5; }
+    }
+
+    .version {
+      position: fixed;
+      bottom: 20px;
+      font-size: 11px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-wrap">
+    <div class="logo-icon">🏛️</div>
+    <div class="logo-text">
+      <h1>eSeva Center</h1>
+      <p>Citizen Services Desktop App</p>
+    </div>
+  </div>
+
+  <div class="spinner-wrap">
+    <div class="spinner"></div>
+    <div class="status" id="status">Starting backend services…</div>
+  </div>
+
+  <div class="version">v1.0.0</div>
+
+  <script>
+    const messages = [
+      'Starting backend services…',
+      'Loading OCR engine…',
+      'Initialising database…',
+      'Almost ready…',
+    ];
+    let i = 0;
+    let externalUpdate = false;
+    const el = document.getElementById('status');
+
+    // Cycle through messages until main.js pushes a time-based update
+    const timer = setInterval(() => {
+      if (externalUpdate) { clearInterval(timer); return; }
+      i = (i + 1) % messages.length;
+      el.textContent = messages[i];
+    }, 2200);
+
+    // main.js calls executeJavaScript which sets this flag via the DOM
+    // Use a MutationObserver so we know when main.js has taken over
+    new MutationObserver(() => {
+      const txt = el.textContent || '';
+      if (txt.includes('(') || txt.includes('longer')) {
+        externalUpdate = true;
+        el.style.animation = 'none';
+        el.style.opacity = '1';
+      }
+    }).observe(el, { childList: true, subtree: true, characterData: true });
+  </script>
+</body>
+</html>

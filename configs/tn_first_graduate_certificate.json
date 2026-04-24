@@ -1,0 +1,56 @@
+{
+  "service_name": "TN First Graduate Certificate",
+  "service_id": "tn_first_graduate_certificate",
+  "version": "1.0.0",
+  "description": "Tamil Nadu First Graduate Certificate",
+  "url_patterns": [
+    "*.tn.gov.in.*first.*graduate",
+    "csccloud.in.*first.*graduate"
+  ],
+  "field_mappings": {
+    "applicant_name": {
+      "form_field_id": "applicant_name",
+      "input_type": "text",
+      "label_hint": "Applicant Name",
+      "required": true
+    },
+    "father_name": {
+      "form_field_id": "father_name",
+      "input_type": "text",
+      "label_hint": "Father's Name",
+      "required": true
+    },
+    "mother_name": {
+      "form_field_id": "mother_name",
+      "input_type": "text",
+      "label_hint": "Mother's Name",
+      "required": true
+    },
+    "dob": {
+      "form_field_id": "date_of_birth",
+      "input_type": "date",
+      "label_hint": "Date of Birth",
+      "required": true
+    },
+    "gender": {
+      "form_field_id": "gender",
+      "input_type": "select",
+      "label_hint": "Gender",
+      "required": true
+    },
+    "address_line1": {
+      "form_field_id": "address",
+      "input_type": "textarea",
+      "label_hint": "Address",
+      "required": true
+    },
+    "mobile": {
+      "form_field_id": "mobile_no",
+      "input_type": "tel",
+      "label_hint": "Mobile Number",
+      "required": true
+    }
+  },
+  "upload_fields": ["educational_proof", "identity_proof", "address_proof"],
+  "conditional_logic": {}
+}

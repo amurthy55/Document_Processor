@@ -1,0 +1,44 @@
+{
+  "service_name": "TN Property Tax Payment",
+  "service_id": "tn_property_tax",
+  "version": "1.0.0",
+  "description": "Tamil Nadu Property Tax Payment",
+  "url_patterns": [
+    "*.tn.gov.in.*property",
+    "tnproperty.gov.in"
+  ],
+  "field_mappings": {
+    "applicant_name": {
+      "form_field_id": "property_owner_name",
+      "input_type": "text",
+      "label_hint": "Property Owner Name",
+      "required": true
+    },
+    "address_line1": {
+      "form_field_id": "property_address",
+      "input_type": "textarea",
+      "label_hint": "Property Address",
+      "required": true
+    },
+    "district": {
+      "form_field_id": "district",
+      "input_type": "select",
+      "label_hint": "District",
+      "required": true
+    },
+    "taluk": {
+      "form_field_id": "taluk",
+      "input_type": "select",
+      "label_hint": "Taluk",
+      "required": true
+    },
+    "mobile": {
+      "form_field_id": "mobile_no",
+      "input_type": "tel",
+      "label_hint": "Mobile Number",
+      "required": true
+    }
+  },
+  "upload_fields": ["property_proof"],
+  "conditional_logic": {}
+}

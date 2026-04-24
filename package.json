@@ -1,0 +1,116 @@
+{
+  "name": "eseva-center",
+  "version": "1.0.0",
+  "description": "eSeva Center — Citizen Services Desktop App",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build:win": "electron-builder --win",
+    "build:win-nosign": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false WIN_CSC_LINK= electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.eseva.center",
+    "productName": "eSeva Center",
+    "copyright": "Copyright © 2025 eSeva Center",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "electron/**/*",
+      "node_modules/**",
+      "!node_modules/.bin/**",
+      "!node_modules/electron/**",
+      "!node_modules/electron-builder/**",
+      "!node_modules/cross-env/**",
+      "!dist/**",
+      "!.venv/**",
+      "!scripts/**",
+      "!operations/**"
+    ],
+    "extraResources": [
+      {
+        "from": "ui",
+        "to": "ui"
+      },
+      {
+        "from": "dist/eseva-backend",
+        "to": "eseva-backend",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "resources/tesseract",
+        "to": "tesseract",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "configs",
+        "to": "configs"
+      },
+      {
+        "from": "extension",
+        "to": "extension"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "category": "Office",
+      "description": "eSeva Center — Citizen Services Desktop App"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "shortcutName": "eSeva Center",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true
+    }
+  },
+  "dependencies": {
+    "electron-log": "^5.1.2"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "keywords": [
+    "eseva",
+    "citizen-services",
+    "government",
+    "documents"
+  ],
+  "author": "eSeva Center",
+  "license": "MIT"
+}

@@ -1,0 +1,16 @@
+{
+  "service_name": "www_belarc_com",
+  "version": "1.0.0",
+  "created_at": "2026-02-26T12:59:38.244185",
+  "url_patterns": [
+    "www.belarc.com"
+  ],
+  "field_mappings": {
+    "applicant_name": "FNAME",
+    "father_name": "LNAME",
+    "email": "EMAILTYPE",
+    "occupation": "MMERGE3"
+  },
+  "upload_fields": [],
+  "conditional_logic": {}
+}

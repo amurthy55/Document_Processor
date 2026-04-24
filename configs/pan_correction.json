@@ -1,0 +1,50 @@
+{
+  "service_name": "PAN Correction",
+  "service_id": "pan_correction",
+  "version": "1.0.0",
+  "description": "PAN Card Correction Application",
+  "url_patterns": [
+    "pan.utiitsl.com",
+    "incometaxonline.gov.in"
+  ],
+  "field_mappings": {
+    "applicant_name": {
+      "form_field_id": "applicant_name",
+      "input_type": "text",
+      "label_hint": "Full Name as per PAN",
+      "required": true
+    },
+    "father_name": {
+      "form_field_id": "father_name",
+      "input_type": "text",
+      "label_hint": "Father's Name",
+      "required": true
+    },
+    "dob": {
+      "form_field_id": "date_of_birth",
+      "input_type": "date",
+      "label_hint": "Date of Birth",
+      "required": true
+    },
+    "address_line1": {
+      "form_field_id": "address",
+      "input_type": "textarea",
+      "label_hint": "Address",
+      "required": true
+    },
+    "mobile": {
+      "form_field_id": "mobile_no",
+      "input_type": "tel",
+      "label_hint": "Mobile Number",
+      "required": true
+    },
+    "email": {
+      "form_field_id": "email",
+      "input_type": "email",
+      "label_hint": "Email",
+      "required": true
+    }
+  },
+  "upload_fields": ["pan_card", "identity_proof", "address_proof"],
+  "conditional_logic": {}
+}

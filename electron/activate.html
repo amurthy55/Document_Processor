@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eSeva Center — Activate</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a2744;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+    }
+
+    .card {
+      background: #1e2d55;
+      border: 1px solid #2a3d6b;
+      border-radius: 16px;
+      padding: 40px 48px;
+      width: 460px;
+      max-width: 90vw;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35);
+    }
+
+    .logo-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .logo-text p {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: #0f1a33;
+      border: 1.5px solid #2a3d6b;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 18px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      text-transform: uppercase;
+    }
+
+    input[type="text"]::placeholder {
+      color: #3d5278;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="text"]:focus {
+      border-color: #f97316;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #475569;
+      margin-top: 8px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error {
+      display: none;
+      margin-top: 16px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .error.show { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      margin-top: 28px;
+      font-size: 12px;
+      color: #475569;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">🏛️</div>
+      <div class="logo-text">
+        <h1>eSeva Center</h1>
+        <p>Citizen Services Desktop App</p>
+      </div>
+    </div>
+
+    <h2>Activate your license</h2>
+    <p class="subtitle">
+      Enter the license key provided to your service center.<br>
+      Contact your administrator if you don't have a key.
+    </p>
+
+    <label for="keyInput">License Key</label>
+    <input
+      type="text"
+      id="keyInput"
+      placeholder="ESEVA-XXXX-XXXX-XXXX"
+      maxlength="20"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <div class="hint">Format: ESEVA-XXXX-XXXX-XXXX</div>
+
+    <div class="error" id="errorBox"></div>
+
+    <button id="activateBtn" onclick="doActivate()">Activate</button>
+
+    <div class="footer">
+      This software is licensed per service center machine.<br>
+      Sharing this key is a violation of the license agreement.
+    </div>
+  </div>
+
+  <script>
+    const input      = document.getElementById('keyInput');
+    const btn        = document.getElementById('activateBtn');
+    const errorBox   = document.getElementById('errorBox');
+
+    // Auto-format input as ESEVA-XXXX-XXXX-XXXX
+    input.addEventListener('input', () => {
+      let val = input.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      // Insert dashes at positions 5, 9, 13 (after ESEVA, then groups of 4)
+      // Total raw chars: 5 (ESEVA) + 4 + 4 + 4 = 17
+      let formatted = '';
+      for (let i = 0; i < val.length && i < 19; i++) {
+        if (i === 5 || i === 9 || i === 13) formatted += '-';
+        formatted += val[i];
+      }
+      input.value = formatted;
+    });
+
+    // Allow Enter key to submit
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doActivate();
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.add('show');
+    }
+
+    function clearError() {
+      errorBox.classList.remove('show');
+    }
+
+    async function doActivate() {
+      const key = input.value.trim();
+      if (!key) { showError('Please enter your license key.'); return; }
+      if (!/^ESEVA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key)) {
+        showError('Invalid format. Key should look like: ESEVA-XXXX-XXXX-XXXX');
+        return;
+      }
+
+      clearError();
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Activating…';
+
+      try {
+        const result = await window.licenseAPI.activate(key);
+        if (result.success) {
+          btn.innerHTML = '✓ Activated!';
+          // main.js listens for this and proceeds to load the app
+          window.licenseAPI.activationComplete(result.centerName);
+        } else {
+          showError(result.error || 'Activation failed. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Activate';
+        }
+      } catch (err) {
+        showError(err.message || 'Could not connect to license server. Check your internet connection.');
+        btn.disabled = false;
+        btn.textContent = 'Activate';
+      }
+    }
+  </script>
+</body>
+</html>

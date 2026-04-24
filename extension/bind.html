@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bind Operation</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; }
+      label { display: block; margin-top: 12px; font-weight: 600; }
+      input { width: 100%; padding: 8px; font-size: 14px; }
+      button { margin-top: 14px; padding: 10px 12px; font-size: 14px; }
+      .hint { color: #555; margin-top: 8px; font-size: 12px; }
+      .status { margin-top: 12px; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <h2>Bind Operation to this Window</h2>
+
+    <div class="hint">
+      Paste <code>operation_id</code> and <code>session_token</code> from the desktop app (or curl).
+      This binding is kept in-memory (not saved to disk).
+    </div>
+
+    <label for="op">Operation ID</label>
+    <input id="op" placeholder="UUID" />
+
+    <label for="token">Session Token</label>
+    <input id="token" placeholder="token" />
+
+    <button id="bindBtn">Bind</button>
+
+    <div id="status" class="status"></div>
+
+    <script src="bind.js"></script>
+  </body>
+</html>

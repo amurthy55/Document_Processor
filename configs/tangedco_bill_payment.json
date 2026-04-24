@@ -1,0 +1,32 @@
+{
+  "service_name": "TANGEDCO Bill Payment",
+  "service_id": "tangedco_bill_payment",
+  "version": "1.0.0",
+  "description": "Tamil Nadu Electricity Board Bill Payment",
+  "url_patterns": [
+    "tneaonline.com",
+    "tangedco.gov.in"
+  ],
+  "field_mappings": {
+    "applicant_name": {
+      "form_field_id": "customer_name",
+      "input_type": "text",
+      "label_hint": "Customer Name",
+      "required": false
+    },
+    "mobile": {
+      "form_field_id": "consumer_number",
+      "input_type": "text",
+      "label_hint": "Consumer Number / Mobile",
+      "required": true
+    },
+    "email": {
+      "form_field_id": "email",
+      "input_type": "email",
+      "label_hint": "Email",
+      "required": false
+    }
+  },
+  "upload_fields": [],
+  "conditional_logic": {}
+}

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eSeva Extension Test Form</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .page-header {
+      max-width: 760px;
+      margin: 0 auto 24px;
+    }
+    .page-header h1 {
+      font-size: 1.3em;
+      color: #1e293b;
+      font-weight: 700;
+    }
+    .page-header p {
+      font-size: 0.82em;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-block;
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fde047;
+      border-radius: 4px;
+      font-size: 0.72em;
+      font-weight: 700;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      letter-spacing: 0.05em;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 24px 28px;
+      max-width: 760px;
+      margin: 0 auto 20px;
+    }
+    .card-title {
+      font-size: 0.72em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #94a3b8;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .grid.single { grid-template-columns: 1fr; }
+    .grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78em;
+      font-weight: 600;
+      color: #475569;
+    }
+    label .field-id {
+      font-weight: 400;
+      color: #94a3b8;
+      font-family: monospace;
+      font-size: 0.9em;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="number"],
+    textarea,
+    select {
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      padding: 8px 10px;
+      font-size: 0.88em;
+      color: #1e293b;
+      background: #fafafa;
+      transition: all 0.15s;
+      width: 100%;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+      box-shadow: 0 0 0 2px #eff6ff;
+    }
+    input.filled, textarea.filled, select.filled {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+    textarea { resize: vertical; min-height: 72px; }
+
+    /* Status bar */
+    .status-bar {
+      max-width: 760px;
+      margin: 0 auto 20px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 0.82em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .status-bar .status-left { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+    .dot.green { background: #4ade80; }
+    #status-text { color: #94a3b8; }
+    #status-text.active { color: #e2e8f0; }
+
+    .fill-count {
+      font-size: 0.85em;
+      color: #4ade80;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Submit area */
+    .submit-area {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-reset {
+      background: none;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 0.88em;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.15s;
+    }
+    .btn-reset:hover { border-color: #94a3b8; color: #1e293b; }
+    .note {
+      font-size: 0.75em;
+      color: #94a3b8;
+      margin-left: auto;
+    }
+
+    /* File upload fields */
+    .file-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .file-field label { font-size: 0.78em; font-weight: 600; color: #475569; }
+    .file-upload-box {
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      padding: 18px 14px;
+      text-align: center;
+      background: #fafafa;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .file-upload-box:hover { border-color: #3b82f6; background: #eff6ff; }
+    .file-upload-box.has-file { border-color: #86efac; background: #f0fdf4; }
+    .file-upload-box input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .file-upload-box .upload-icon { font-size: 1.4em; margin-bottom: 4px; }
+    .file-upload-box .upload-hint { font-size: 0.78em; color: #64748b; }
+    .file-upload-box .upload-hint strong { color: #1e293b; }
+    .file-upload-box .file-chosen { font-size: 0.78em; color: #166534; font-weight: 600; display: none; margin-top: 4px; }
+    .file-upload-box.has-file .file-chosen { display: block; }
+    .file-upload-box.has-file .upload-hint { display: none; }
+    .photo-preview {
+      width: 80px; height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      display: none;
+      margin: 8px auto 0;
+    }
+    .photo-preview.visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>eSeva Extension Test Form <span class="badge">DEV TEST</span></h1>
+    <p>Load an operation from the extension panel → verify all fields fill correctly. Field IDs shown in grey.</p>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="dot" id="status-dot"></div>
+      <span id="status-text">Waiting for extension to fill fields…</span>
+    </div>
+    <span class="fill-count" id="fill-count"></span>
+  </div>
+
+  <form id="test-form" onsubmit="return false;">
+
+    <!-- Personal Details -->
+    <div class="card">
+      <div class="card-title">Personal Details</div>
+      <div class="grid">
+        <div class="field">
+          <label>Applicant Name <span class="field-id">applicant_name</span></label>
+          <input type="text" id="applicant_name" name="applicant_name" placeholder="Full name as per documents">
+        </div>
+        <div class="field">
+          <label>Date of Birth <span class="field-id">date_of_birth</span></label>
+          <input type="text" id="date_of_birth" name="date_of_birth" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="field">
+          <label>Father's Name <span class="field-id">father_name</span></label>
+          <input type="text" id="father_name" name="father_name" placeholder="Father's full name">
+        </div>
+        <div class="field">
+          <label>Mother's Name <span class="field-id">mother_name</span></label>
+          <input type="text" id="mother_name" name="mother_name" placeholder="Mother's full name">
+        </div>
+        <div class="field">
+          <label>Gender <span class="field-id">gender</span></label>
+          <select id="gender" name="gender">
+            <option value="">— Select —</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="male">male</option>
+            <option value="female">female</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Age <span class="field-id">age</span></label>
+          <input type="text" id="age" name="age" placeholder="Age in years">
+        </div>
+        <div class="field">
+          <label>Place of Birth <span class="field-id">place_of_birth</span></label>
+          <input type="text" id="place_of_birth" name="place_of_birth" placeholder="City / Town">
+        </div>
+        <div class="field">
+          <label>Nationality <span class="field-id">nationality</span></label>
+          <input type="text" id="nationality" name="nationality" placeholder="e.g. Indian">
+        </div>
+        <div class="field">
+          <label>Community <span class="field-id">community</span></label>
+          <select id="community" name="community">
+            <option value="">— Select —</option>
+            <option value="OBC">OBC</option>
+            <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="General">General</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Religion <span class="field-id">religion</span></label>
+          <input type="text" id="religion" name="religion" placeholder="e.g. Hindu">
+        </div>
+        <div class="field">
+          <label>Occupation <span class="field-id">occupation</span></label>
+          <input type="text" id="occupation" name="occupation" placeholder="e.g. Farmer, Teacher">
+        </div>
+        <div class="field">
+          <label>Annual Income <span class="field-id">annual_income</span></label>
+          <input type="text" id="annual_income" name="annual_income" placeholder="e.g. 120000">
+        </div>
+      </div>
+    </div>
+
+    <!-- Identity Numbers -->
+    <div class="card">
+      <div class="card-title">Identity Numbers</div>
+      <div class="grid">
+        <div class="field">
+          <label>Aadhaar Number <span class="field-id">aadhaar_number</span></label>
+          <input type="text" id="aadhaar_number" name="aadhaar_number" placeholder="12-digit Aadhaar">
+        </div>
+        <div class="field">
+          <label>PAN Number <span class="field-id">pan</span></label>
+          <input type="text" id="pan" name="pan" placeholder="ABCDE1234F">
+        </div>
+        <div class="field">
+          <label>Voter ID <span class="field-id">voter_id</span></label>
+          <input type="text" id="voter_id" name="voter_id" placeholder="Voter ID number">
+        </div>
+        <div class="field">
+          <label>Passport Number <span class="field-id">passport_number</span></label>
+          <input type="text" id="passport_number" name="passport_number" placeholder="e.g. A1234567">
+        </div>
+        <div class="field">
+          <label>Ration Card Number <span class="field-id">ration_card</span></label>
+          <input type="text" id="ration_card" name="ration_card" placeholder="Ration card number">
+        </div>
+        <div class="field">
+          <label>Registration / Certificate No. <span class="field-id">registration_no</span></label>
+          <input type="text" id="registration_no" name="registration_no" placeholder="Certificate registration number">
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Details -->
+    <div class="card">
+      <div class="card-title">Contact Details</div>
+      <div class="grid">
+        <div class="field">
+          <label>Mobile Number <span class="field-id">mobile_no</span></label>
+          <input type="tel" id="mobile_no" name="mobile_no" placeholder="10-digit mobile">
+        </div>
+        <div class="field">
+          <label>Alternate Mobile <span class="field-id">alt_mobile</span></label>
+          <input type="tel" id="alt_mobile" name="alt_mobile" placeholder="Alternate number">
+        </div>
+        <div class="field">
+          <label>Email Address <span class="field-id">email</span></label>
+          <input type="email" id="email" name="email" placeholder="email@example.com">
+        </div>
+        <div class="field">
+          <label>Pin Code <span class="field-id">pincode</span></label>
+          <input type="text" id="pincode" name="pincode" placeholder="6-digit PIN">
+        </div>
+        <div class="field full">
+          <label>Full Address <span class="field-id">address</span></label>
+          <textarea id="address" name="address" placeholder="Door no, Street, Area, City, State"></textarea>
+        </div>
+        <div class="field">
+          <label>District <span class="field-id">district</span></label>
+          <input type="text" id="district" name="district" placeholder="District name">
+        </div>
+        <div class="field">
+          <label>Taluk <span class="field-id">taluk</span></label>
+          <input type="text" id="taluk" name="taluk" placeholder="Taluk name">
+        </div>
+        <div class="field">
+          <label>Village / Town <span class="field-id">village</span></label>
+          <input type="text" id="village" name="village" placeholder="Village or town">
+        </div>
+        <div class="field">
+          <label>State <span class="field-id">state</span></label>
+          <input type="text" id="state" name="state" placeholder="e.g. Tamil Nadu">
+        </div>
+      </div>
+    </div>
+
+    <!-- For Birth Certificate -->
+    <div class="card">
+      <div class="card-title">Birth Certificate Fields</div>
+      <div class="grid">
+        <div class="field">
+          <label>Child Name <span class="field-id">child_name</span></label>
+          <input type="text" id="child_name" name="child_name" placeholder="Name of child">
+        </div>
+        <div class="field">
+          <label>Date of Birth (Child) <span class="field-id">dob</span></label>
+          <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="field">
+          <label>Date of Registration <span class="field-id">registration_date</span></label>
+          <input type="text" id="registration_date" name="registration_date" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="field">
+          <label>Date of Issue <span class="field-id">issue_date</span></label>
+          <input type="text" id="issue_date" name="issue_date" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="field">
+          <label>Hospital / Place of Delivery <span class="field-id">hospital</span></label>
+          <input type="text" id="hospital" name="hospital" placeholder="Hospital or home">
+        </div>
+        <div class="field">
+          <label>Sex <span class="field-id">sex</span></label>
+          <select id="sex" name="sex">
+            <option value="">— Select —</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Uploads -->
+    <div class="card">
+      <div class="card-title">Document Uploads</div>
+      <div class="grid">
+        <div class="file-field">
+          <label>Primary Document <span class="field-id">doc_upload_1</span></label>
+          <div class="file-upload-box" id="box-doc1">
+            <input type="file" id="doc_upload_1" name="doc_upload_1" accept=".pdf,.jpg,.jpeg,.png">
+            <div class="upload-icon">📄</div>
+            <div class="upload-hint"><strong>Click to upload</strong> or drag &amp; drop<br>PDF, JPG or PNG</div>
+            <div class="file-chosen" id="chosen-doc1">No file chosen</div>
+          </div>
+        </div>
+        <div class="file-field">
+          <label>Secondary Document <span class="field-id">doc_upload_2</span></label>
+          <div class="file-upload-box" id="box-doc2">
+            <input type="file" id="doc_upload_2" name="doc_upload_2" accept=".pdf,.jpg,.jpeg,.png">
+            <div class="upload-icon">📄</div>
+            <div class="upload-hint"><strong>Click to upload</strong> or drag &amp; drop<br>PDF, JPG or PNG</div>
+            <div class="file-chosen" id="chosen-doc2">No file chosen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo Upload -->
+    <div class="card">
+      <div class="card-title">Applicant Photo</div>
+      <div class="grid" style="grid-template-columns: 200px 1fr; align-items: start;">
+        <div class="file-field">
+          <label>Passport Photo <span class="field-id">applicant_photo</span></label>
+          <div class="file-upload-box" id="box-photo" style="min-height: 140px;">
+            <input type="file" id="applicant_photo" name="applicant_photo" accept=".jpg,.jpeg,.png">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-hint"><strong>Click to upload</strong><br>JPG or PNG · max 50 KB</div>
+            <div class="file-chosen" id="chosen-photo">No file chosen</div>
+            <img id="photo-preview" class="photo-preview" alt="Preview">
+          </div>
+        </div>
+        <div style="font-size:0.78em; color:#94a3b8; padding-top: 24px; line-height: 1.7;">
+          <p>The extension will auto-populate this field with the compressed passport photo stored in the operation folder.</p>
+          <p style="margin-top:8px;">Accepted: JPG / PNG · Target size: &lt; 50 KB</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit area (decorative only) -->
+    <div class="submit-area">
+      <button type="button" class="btn-reset" onclick="resetForm()">Clear All</button>
+      <span class="note">This form does not submit. It is for extension testing only.</span>
+    </div>
+
+  </form>
+
+  <script>
+    const form = document.getElementById('test-form');
+    const textInputs = form.querySelectorAll('input:not([type="file"]), textarea, select');
+    const fileInputs = form.querySelectorAll('input[type="file"]');
+
+    // ── File input handlers ──────────────────────────────────────────────────
+    function setupFileInput(inputId, boxId, chosenId, previewId) {
+      const inp  = document.getElementById(inputId);
+      const box  = document.getElementById(boxId);
+      const lbl  = document.getElementById(chosenId);
+      const prev = previewId ? document.getElementById(previewId) : null;
+
+      function onFileChange() {
+        const file = inp.files && inp.files[0];
+        if (file) {
+          box.classList.add('has-file');
+          lbl.textContent = file.name;
+          if (prev && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = e => { prev.src = e.target.result; prev.classList.add('visible'); };
+            reader.readAsDataURL(file);
+          }
+        } else {
+          box.classList.remove('has-file');
+          lbl.textContent = 'No file chosen';
+          if (prev) { prev.src = ''; prev.classList.remove('visible'); }
+        }
+        updateStatus();
+      }
+
+      inp.addEventListener('change', onFileChange);
+    }
+
+    setupFileInput('doc_upload_1', 'box-doc1', 'chosen-doc1', null);
+    setupFileInput('doc_upload_2', 'box-doc2', 'chosen-doc2', null);
+    setupFileInput('applicant_photo', 'box-photo', 'chosen-photo', 'photo-preview');
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    function updateStatus() {
+      let filled = 0;
+      textInputs.forEach(el => {
+        const hasValue = el.value && el.value.trim() !== '';
+        el.classList.toggle('filled', hasValue);
+        if (hasValue) filled++;
+      });
+
+      let filesAttached = 0;
+      fileInputs.forEach(el => {
+        if (el.files && el.files.length > 0) filesAttached++;
+      });
+
+      const total = textInputs.length + fileInputs.length;
+      const totalFilled = filled + filesAttached;
+
+      const dot  = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+      const cnt  = document.getElementById('fill-count');
+
+      if (totalFilled > 0) {
+        dot.classList.add('green');
+        text.textContent = `Extension filled ${filled} field(s)${filesAttached ? `, ${filesAttached} file(s) attached` : ''}`;
+        text.classList.add('active');
+        cnt.textContent = `${totalFilled} / ${total} filled`;
+      } else {
+        dot.classList.remove('green');
+        text.textContent = 'Waiting for extension to fill fields…';
+        text.classList.remove('active');
+        cnt.textContent = '';
+      }
+    }
+
+    // Listen for text input events
+    textInputs.forEach(el => {
+      el.addEventListener('input', updateStatus);
+      el.addEventListener('change', updateStatus);
+    });
+
+    // Poll every 500ms — extension may use native setter without triggering events
+    setInterval(updateStatus, 500);
+
+    // ── Reset ────────────────────────────────────────────────────────────────
+    function resetForm() {
+      textInputs.forEach(el => { el.value = ''; el.classList.remove('filled'); });
+      ['doc_upload_1', 'doc_upload_2', 'applicant_photo'].forEach(id => {
+        const inp = document.getElementById(id);
+        inp.value = '';
+        inp.dispatchEvent(new Event('change'));
+      });
+      updateStatus();
+    }
+
+    updateStatus();
+  </script>
+
+</body>
+</html>

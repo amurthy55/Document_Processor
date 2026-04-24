@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "eSevaCenter Assistant",
+  "version": "1.0.0",
+  "description": "Human-assisted form automation for Tamil Nadu e-service centers. No auto-submit.",
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:*/*",
+    "https://*.tn.gov.in/*",
+    "https://*.tnsdc.gov.in/*",
+    "https://*.tneb.in/*",
+    "https://tneaonline.com/*",
+    "https://passportindia.gov.in/*",
+    "https://cgionline.gov.in/*",
+    "https://pan.utiitsl.com/*",
+    "https://nvsp.in/*",
+    "https://csccloud.in/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "eSevaCenter Assistant"
+  },
+  "commands": {
+    "bind-or-admin": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Bind operation or toggle admin mode"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "content-script.js", "form-injector.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}
