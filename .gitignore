@@ -5,6 +5,11 @@ node_modules/
 # Build output
 dist/
 build/
+dist-packaged/
+dist-packaged-*/
+eSeva_EXTRACTED*/
+*.zip
+*.exe
 
 # Python
 __pycache__/
@@ -28,13 +33,19 @@ Thumbs.db
 resources/tesseract/
 
 # Operations data (user data, not source)
-operations/
+/operations/
 ~/eSeva-Operations/
 
 # User documents and test files (should not be in repo)
 *.pdf
 backend.log
 *.log
+temp_cert.txt
+tmp-appdata*/
+backend/tmp-appdata*/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
 
 # License server temporary files
 license-server/.wrangler/

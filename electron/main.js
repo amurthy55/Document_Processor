@@ -93,6 +93,15 @@ function getBackendCommand() {
         return { exe: frozenExe, args: [], cwd: path.dirname(frozenExe), frozen: true };
       }
     }
+
+    // Try resources/eseva-backend path (electron-packager structure)
+    for (const exeName of possibleNames) {
+      const frozenExe = path.join(APP_ROOT, 'resources', 'eseva-backend', exeName);
+      if (fs.existsSync(frozenExe)) {
+        return { exe: frozenExe, args: [], cwd: path.dirname(frozenExe), frozen: true };
+      }
+    }
+
     log.warn('[backend] PyInstaller binary not found, falling back to python');
   }
 

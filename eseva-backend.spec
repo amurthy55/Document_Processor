@@ -58,6 +58,9 @@ for pkg in ['numpy']:
 # static analysis but routers are imported dynamically).
 datas += [(os.path.join(BACKEND, 'app'), 'app')]
 
+# ── Explicitly include operations module as data ───────────────────────────────
+datas += [(os.path.join(BACKEND, 'app', 'operations'), 'app/operations')]
+
 # ── Explicit hidden imports for dynamic router loading in app/main.py ─────────
 hiddenimports += [
     'app.main',
@@ -67,6 +70,7 @@ hiddenimports += [
     'app.improved_extractor',
     'app.optimized_processor',
     'app.mapping_engine',
+    'app.operations',
     'app.operations.store',
     'app.services.config_store',
     'app.routers.documents',

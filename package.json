@@ -8,6 +8,7 @@
     "dev": "electron . --dev",
     "build:win": "electron-builder --win",
     "build:win-nosign": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false WIN_CSC_LINK= electron-builder --win",
+    "build:win-packager": "electron-packager . eSeva-Center --platform=win32 --arch=x64 --out=dist-packaged --overwrite --icon=assets/icon.ico",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "postinstall": "electron-builder install-app-deps"
@@ -40,12 +41,16 @@
       {
         "from": "dist/eseva-backend",
         "to": "eseva-backend",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       },
       {
         "from": "resources/tesseract",
         "to": "tesseract",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       },
       {
         "from": "configs",
@@ -59,7 +64,7 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "portable",
           "arch": [
             "x64"
           ]
@@ -103,7 +108,8 @@
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^29.0.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
   },
   "keywords": [
     "eseva",
