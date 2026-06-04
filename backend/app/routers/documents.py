@@ -161,6 +161,7 @@ def _set_status(operation_id: str, **kwargs) -> None:
 # falling back to repo-relative path for dev mode.
 import os as _os
 OPS_DIR = Path(_os.environ.get("ESEVA_OPS_DIR") or Path(__file__).parent.parent.parent.parent / "operations")
+print(f"[documents] OPS_DIR={OPS_DIR}")
 
 @router.post("/process", response_model=ProcessingStatus)
 async def process_documents(

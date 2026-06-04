@@ -181,6 +181,19 @@ function attachBackendHandlers() {
   if (!backendProcess) return;
   
   let startupCompleted = false;
+  function markStartupComplete(output) {
+    if (
+      !startupCompleted &&
+      (output.includes('Application startup complete') ||
+        output.includes('Uvicorn running on'))
+    ) {
+      startupCompleted = true;
+      clearTimeout(startupTimeout);
+      restartAttempts = 0; // Reset counter on successful start
+      log.info('[backend] Startup completed successfully');
+    }
+  }
+
   const startupTimeout = setTimeout(() => {
     if (!startupCompleted) {
       log.error('[backend] Startup timeout - backend may be hanging');
@@ -191,20 +204,13 @@ function attachBackendHandlers() {
   backendProcess.stdout.on('data', d => {
     const output = d.toString().trim();
     log.info(`[uvicorn] ${output}`);
-    
-    // Check for successful startup indicators
-    if (output.includes('Application startup complete') || 
-        output.includes('Uvicorn running on')) {
-      startupCompleted = true;
-      clearTimeout(startupTimeout);
-      restartAttempts = 0; // Reset counter on successful start
-      log.info('[backend] Startup completed successfully');
-    }
+    markStartupComplete(output);
   });
   
   backendProcess.stderr.on('data', d => {
     const error = d.toString().trim();
     log.warn(`[uvicorn] ${error}`);
+    markStartupComplete(error);
     
     // Check for critical errors that require immediate stop
     if (error.includes('Permission denied') ||
