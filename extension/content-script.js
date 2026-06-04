@@ -596,6 +596,22 @@ async function checkForActiveOperation() {
 /**
  * Fill form fields with structured data
  */
+function getMappedFieldIds(mapping) {
+  if (!mapping) return [];
+  if (typeof mapping === 'string') return [mapping];
+  if (Array.isArray(mapping)) return mapping.filter(Boolean);
+
+  const ids =
+    mapping.form_field_ids ||
+    mapping.field_ids ||
+    mapping.targets ||
+    mapping.form_field_id ||
+    mapping.field_id;
+
+  if (!ids) return [];
+  return (Array.isArray(ids) ? ids : [ids]).filter(Boolean);
+}
+
 async function fillFormWithData(operation) {
   if (!operation.service_config) {
     console.warn('[eSeva] No service config available');
@@ -612,52 +628,49 @@ async function fillFormWithData(operation) {
     const value = structuredData[masterField];
     if (!value) continue;
 
-    // Handle both string and object mapping formats
-    let fieldId, inputType;
-    if (typeof mapping === 'string') {
-      fieldId = mapping;
-      inputType = 'text'; // Default to text
-    } else {
-      fieldId = mapping.form_field_id;
-      inputType = mapping.input_type;
-    }
+    const inputType = typeof mapping === 'object' && !Array.isArray(mapping)
+      ? mapping.input_type || 'text'
+      : 'text';
+    const fieldIds = getMappedFieldIds(mapping);
 
-    // Try to find field by ID or name
-    let field =
-      document.getElementById(fieldId) ||
-      document.querySelector(`input[name="${fieldId}"]`) ||
-      document.querySelector(`textarea[name="${fieldId}"]`) ||
-      document.querySelector(`select[name="${fieldId}"]`);
+    for (const fieldId of fieldIds) {
+      // Try to find field by ID or name
+      let field =
+        document.getElementById(fieldId) ||
+        document.querySelector(`input[name="${fieldId}"]`) ||
+        document.querySelector(`textarea[name="${fieldId}"]`) ||
+        document.querySelector(`select[name="${fieldId}"]`);
 
-    if (!field) {
-      console.warn(`[eSeva] Field not found: "${fieldId}" (masterField="${masterField}", value="${value}")`);
-      continue;
-    }
-    console.log(`[eSeva] Filling "${fieldId}" with "${value}"`);
-
-    // For Google Forms: hidden inputs hold the name, but visible inputs are separate.
-    // Find the visible input in the same question container and fill that instead.
-    if (field.type === 'hidden') {
-      const visibleField = findVisibleInputForHidden(field, fieldId);
-      if (visibleField) {
-        console.log(`[eSeva] Found visible input for hidden field "${fieldId}"`);
-        setFieldValue(visibleField, value, inputType);
-        // Trigger events that Google Forms listens to
-        visibleField.focus();
-        visibleField.dispatchEvent(new Event('input', { bubbles: true }));
-        visibleField.dispatchEvent(new Event('change', { bubbles: true }));
-        visibleField.dispatchEvent(new Event('blur', { bubbles: true }));
+      if (!field) {
+        console.warn(`[eSeva] Field not found: "${fieldId}" (masterField="${masterField}", value="${value}")`);
         continue;
       }
-      // If no visible input found, set hidden field value as fallback
-      console.log(`[eSeva] No visible input found for "${fieldId}", setting hidden field`);
+      console.log(`[eSeva] Filling "${fieldId}" with "${value}"`);
+
+      // For Google Forms: hidden inputs hold the name, but visible inputs are separate.
+      // Find the visible input in the same question container and fill that instead.
+      if (field.type === 'hidden') {
+        const visibleField = findVisibleInputForHidden(field, fieldId);
+        if (visibleField) {
+          console.log(`[eSeva] Found visible input for hidden field "${fieldId}"`);
+          setFieldValue(visibleField, value, inputType);
+          // Trigger events that Google Forms listens to
+          visibleField.focus();
+          visibleField.dispatchEvent(new Event('input', { bubbles: true }));
+          visibleField.dispatchEvent(new Event('change', { bubbles: true }));
+          visibleField.dispatchEvent(new Event('blur', { bubbles: true }));
+          continue;
+        }
+        // If no visible input found, set hidden field value as fallback
+        console.log(`[eSeva] No visible input found for "${fieldId}", setting hidden field`);
+      }
+
+      setFieldValue(field, value, inputType);
+
+      // Trigger change event
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      field.dispatchEvent(new Event('change', { bubbles: true }));
     }
-
-    setFieldValue(field, value, inputType);
-
-    // Trigger change event
-    field.dispatchEvent(new Event('input', { bubbles: true }));
-    field.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   console.log('[eSeva] Form filled successfully');
@@ -1434,8 +1447,9 @@ function displayFieldsInAdminPanel(fields, suggestions = [], draftConfig = null)
   const persistedMap = {};
   const configMappings = draftConfig?.field_mappings || {};
   for (const [masterField, mapping] of Object.entries(configMappings)) {
-    const formFieldId = typeof mapping === 'string' ? mapping : mapping?.form_field_id;
-    if (formFieldId) persistedMap[formFieldId] = masterField;
+    for (const formFieldId of getMappedFieldIds(mapping)) {
+      persistedMap[formFieldId] = masterField;
+    }
   }
   const fileMappingHints = draftConfig?.file_mappings || {};
 
@@ -1514,7 +1528,10 @@ async function saveAdminMappings(customServiceName = null) {
     const selectEl = document.getElementById(`eseva-map-${formKey}`);
     if (selectEl) {
       const master = selectEl.value;
-      if (master) approvedMappings[master] = formKey;
+      if (master) {
+        if (!approvedMappings[master]) approvedMappings[master] = [];
+        approvedMappings[master].push(formKey);
+      }
     }
   }
 

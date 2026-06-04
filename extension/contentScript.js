@@ -66,6 +66,25 @@ function findElementBySelector(selector) {
   }
 }
 
+function getMappedTargets(mapping) {
+  if (!mapping) return [];
+  if (typeof mapping === 'string') return [{ formFieldId: mapping }];
+  if (Array.isArray(mapping)) return mapping.filter(Boolean).map((formFieldId) => ({ formFieldId }));
+
+  const ids =
+    mapping.form_field_ids ||
+    mapping.field_ids ||
+    mapping.targets ||
+    mapping.form_field_id ||
+    mapping.field_id;
+
+  const formFieldIds = (Array.isArray(ids) ? ids : [ids]).filter(Boolean);
+  return formFieldIds.map((formFieldId) => ({
+    formFieldId,
+    primarySelector: mapping.primary_selector,
+  }));
+}
+
 async function injectOnce(structuredData, serviceConfig) {
   if (!structuredData || typeof structuredData !== 'object') return { filled: 0, attempted: 0 };
   const mappings = (serviceConfig && serviceConfig.field_mappings) ? serviceConfig.field_mappings : {};
@@ -74,16 +93,24 @@ async function injectOnce(structuredData, serviceConfig) {
   let filled = 0;
 
   for (const [fieldKey, mapping] of Object.entries(mappings)) {
-    attempted += 1;
     const value = structuredData[fieldKey];
     if (value == null || value === '') continue;
 
-    const selector = mapping && mapping.primary_selector ? mapping.primary_selector : null;
-    const el = findElementBySelector(selector);
-    if (!el) continue;
+    const targets = getMappedTargets(mapping);
+    for (const target of targets) {
+      attempted += 1;
+      const selector = target.primarySelector || null;
+      const el =
+        findElementBySelector(selector) ||
+        document.getElementById(target.formFieldId) ||
+        document.querySelector(`input[name="${target.formFieldId}"]`) ||
+        document.querySelector(`textarea[name="${target.formFieldId}"]`) ||
+        document.querySelector(`select[name="${target.formFieldId}"]`);
+      if (!el) continue;
 
-    if (setValue(el, String(value))) {
-      filled += 1;
+      if (setValue(el, String(value))) {
+        filled += 1;
+      }
     }
   }
 

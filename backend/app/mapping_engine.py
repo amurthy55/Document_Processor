@@ -224,20 +224,47 @@ class ServiceConfigBuilder:
 
         if isinstance(field_mappings, dict):
             for master_field, mapping in field_mappings.items():
-                if isinstance(mapping, dict):
-                    form_field_id = mapping.get("form_field_id") or mapping.get("field_id")
-                    if not form_field_id:
+                if isinstance(mapping, list):
+                    form_field_ids = [str(v) for v in mapping if v]
+                    if not form_field_ids:
                         continue
                     config["field_mappings"][master_field] = {
-                        "form_field_id": form_field_id,
+                        "form_field_ids": form_field_ids,
+                        "input_type": "text",
+                        "label_hint": None,
+                        "similarity_score": 1.0,
+                    }
+                    if len(form_field_ids) == 1:
+                        config["field_mappings"][master_field]["form_field_id"] = form_field_ids[0]
+                elif isinstance(mapping, dict):
+                    form_field_ids = (
+                        mapping.get("form_field_ids")
+                        or mapping.get("field_ids")
+                        or mapping.get("targets")
+                    )
+                    form_field_id = mapping.get("form_field_id") or mapping.get("field_id")
+                    if form_field_ids is None and form_field_id:
+                        form_field_ids = [form_field_id]
+                    if not form_field_ids:
+                        continue
+                    if not isinstance(form_field_ids, list):
+                        form_field_ids = [form_field_ids]
+                    form_field_ids = [str(v) for v in form_field_ids if v]
+                    if not form_field_ids:
+                        continue
+                    config["field_mappings"][master_field] = {
+                        "form_field_ids": form_field_ids,
                         "input_type": mapping.get("input_type", "text"),
                         "label_hint": mapping.get("label_hint"),
                         "similarity_score": mapping.get("similarity_score", 1.0),
                     }
+                    if len(form_field_ids) == 1:
+                        config["field_mappings"][master_field]["form_field_id"] = form_field_ids[0]
                 else:
                     # Legacy/simple mapping style: {master_field: "form_field_id"}
                     config["field_mappings"][master_field] = {
                         "form_field_id": str(mapping),
+                        "form_field_ids": [str(mapping)],
                         "input_type": "text",
                         "label_hint": None,
                         "similarity_score": 1.0,
@@ -437,7 +464,7 @@ class AdminMappingProcessor:
         self,
         service_name: str,
         config: dict[str, Any],
-        approved_mappings: dict[str, str] | None = None,
+        approved_mappings: dict[str, str | list[str]] | None = None,
     ) -> Path:
         """
         Finalize and save configuration after admin review.
@@ -452,14 +479,20 @@ class AdminMappingProcessor:
         """
         if approved_mappings:
             # Normalize approved mappings to the canonical object form.
-            config["field_mappings"] = {
-                master_field: {
-                    "form_field_id": form_field_id,
+            config["field_mappings"] = {}
+            for master_field, form_field_ids in approved_mappings.items():
+                if not isinstance(form_field_ids, list):
+                    form_field_ids = [form_field_ids]
+                normalized_ids = [str(v) for v in form_field_ids if v]
+                if not normalized_ids:
+                    continue
+                config["field_mappings"][master_field] = {
+                    "form_field_ids": normalized_ids,
                     "input_type": "text",
                     "label_hint": None,
                     "similarity_score": 1.0,
                 }
-                for master_field, form_field_id in approved_mappings.items()
-            }
+                if len(normalized_ids) == 1:
+                    config["field_mappings"][master_field]["form_field_id"] = normalized_ids[0]
 
         return self._config_builder.save_config(config, service_name)

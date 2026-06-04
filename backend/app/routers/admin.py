@@ -37,7 +37,7 @@ class AdminMappingApprovalRequest(BaseModel):
     """Request to finalize config after admin review."""
     service_name: str
     config: dict
-    approved_mappings: dict[str, str] | None = None
+    approved_mappings: dict[str, str | list[str]] | None = None
 
 
 @router.post("/admin/process-fields")
